@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cy.pj.sys.dao.SysRoleDao">
+   <!-- 写角色自身信息
+    useGeneratedKeys:表示使用insert操作对应的自增主键值
+    keyProperty:表示将自增主键值赋值给参数对象的哪个属性-->
+    <insert id="insertObject"
+           parameterType="com.cy.pj.sys.entity.SysRole"
+           useGeneratedKeys="true"
+           keyProperty="id">
+       insert into sys_roles
+       (name,note,createdUser,createdTime,modifiedUser,modifiedTime)
+       values
+       (#{name},#{note},#{createdUser},now(),#{modifiedUser},now())        
+    </insert>
+   <!-- 假如主键值是自己定义的一个随机数 -->
+   <!-- 
+   <insert id="insertObject"
+           parameterType="com.cy.pj.sys.entity.SysRole">
+       <selectKey keyProperty="id" 
+                  order="BEFORE"
+                  resultType="int">
+            select ceil(rand()*1000000)
+       </selectKey>
+       insert into sys_roles
+       (id,name,note,createdUser,createdTime,modifiedUser,modifiedTime)
+       values
+       (#{id},#{name},#{note},#{createdUser},now(),#{modifiedUser},now())        
+   </insert>
+    -->
+  
+    <!-- sql元素用于对共性进行提取 -->
+    <sql id="queryWhereId">
+         from sys_roles
+         <where>
+            <if test="name!=null and name!=''">
+              name like concat("%",#{name},"%")
+            </if>
+         </where>
+    </sql>
+    <!-- 基于条件统计记录总数 -->
+    <select id="getRowCount" resultType="int">
+         select count(*)
+         <include refid="queryWhereId"/>
+    </select>
+    <!-- 基于条件查询当前页记录 
+         每个SQL元素信息都会封装为一个MappedStatement对象-->
+    <select id="findPageObjects"
+            resultType="com.cy.pj.sys.entity.SysRole">
+          select *
+          <include refid="queryWhereId"/>
+          order by createdTime desc
+          limit #{startIndex},#{pageSize} 
+    </select>
+     <select id="findObjectById"
+           resultMap="sysRoleMenuVo">
+           select id,name,note
+           from sys_roles
+           where id=#{id}        
+   </select>
+     <!-- resultMap一般用于自定义映射或一些关联查询中 -->
+   <resultMap type="com.cy.pj.sys.vo.SysRoleMenuVo" 
+              id="sysRoleMenuVo">
+        <!-- 假如基于id做关联查询，又希望将id值存储到值对象，
+                           可以对id进行专门映射 -->
+        <id property="id" column="id"/>
+        <!-- collection一般应用于one2many查询 -->
+        <collection property="menuIds"
+                    select="com.cy.pj.sys.dao.SysRoleMenuDao.findMenuIdsByRoleId"
+                    column="id">
+        </collection>
+   </resultMap>
+   <update id="updateObject"
+            parameterType="com.cy.pj.sys.entity.SysRole">
+         update sys_roles
+         set
+           name=#{name},
+           note=#{note},
+           modifiedUser=#{modifiedUser},
+           modifiedTime=now()
+        where id=#{id}
+    </update>
+   <select id="findObjects"
+            resultType="com.cy.pj.common.vo.CheckBox">
+           select id,name
+           from sys_roles
+  </select>
+   
+    
+</mapper>

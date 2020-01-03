@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cy.pj.sys.dao.SysMenuDao">
+   <cache  
+    eviction="LRU"
+    flushInterval="600000"
+    size="512"
+    readOnly="false"/><!-- 使用mybatis中二级缓存 -->
+   <select id="findObjects" resultType="map">
+         <!--方案1:多表关联查询(左外连接) -->
+      
+         select c.*,p.name parentName
+         from sys_menus c left outer join sys_menus p
+         on c.parentId=p.id
+       
+         <!--方案2: 嵌套查询 -->
+         <!-- 
+         select c.id,c.name,c.parentId,(select name
+                     from sys_menus p
+                     where c.parentId=p.id) parentName
+         from sys_menus c
+          -->
+   </select>
+   <update id="updateObject"
+           parameterType="com.cy.pj.sys.entity.SysMenu">
+         update sys_menus
+         set
+           name=#{name},
+           type=#{type},
+           sort=#{sort},
+           url=#{url},
+           parentId=#{parentId},
+           permission=#{permission},
+           modifiedUser=#{modifiedUser},
+           modifiedTime=now()
+         where id=#{id}
+   </update>
+   <!-- 将数据持久化到数据库 -->
+   <insert id="insertObject"
+           parameterType="com.cy.pj.sys.entity.SysMenu">
+          insert into sys_menus
+          (name,url,type,sort,note,parentId,permission,
+          createdTime,modifiedTime,createdUser,modifiedUser)
+          values
+          (#{name},#{url},#{type},#{sort},#{note},#{parentId},
+          #{permission},now(),now(),#{createdUser},#{modifiedUser})
+   </insert>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
