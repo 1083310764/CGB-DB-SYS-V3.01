@@ -1,6 +1,6 @@
 # CGB-DB-SYS-V3.01
 sql如下：
-创建jtsys数据库
+/**************************************************************/
 /*
 SQLyog Ultimate v12.08 (64 bit)
 MySQL - 5.5.27 : Database - jtsys
